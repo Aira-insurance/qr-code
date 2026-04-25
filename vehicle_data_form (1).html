@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vehicle Data Collection</title>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; min-height: 100vh; padding: 20px; }
+  .container { max-width: 680px; margin: 0 auto; }
+
+  .header { background: linear-gradient(135deg, #1a73e8, #0d47a1); color: white; padding: 24px 28px; text-align: center; }
+  .header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .header p { font-size: 13px; opacity: 0.85; }
+
+  .card { background: white; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-radius: 0 0 12px 12px; }
+
+  .field-group { margin-bottom: 18px; }
+  label { display: block; font-size: 14px; font-weight: 600; color: #333; margin-bottom: 6px; }
+  .req { color: #e53935; }
+  input[type="text"], input[type="tel"] { width: 100%; padding: 11px 14px; border: 1.5px solid #d0d7de; border-radius: 8px; font-size: 15px; color: #333; background: #fafafa; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+  input:focus { border-color: #1a73e8; box-shadow: 0 0 0 3px rgba(26,115,232,0.12); background: white; }
+  input.error { border-color: #e53935; }
+  .error-msg { color: #e53935; font-size: 12px; margin-top: 4px; display: none; }
+  .hint { color: #888; font-size: 12px; margin-top: 4px; }
+
+  .submit-btn { width: 100%; padding: 13px; background: linear-gradient(135deg, #1a73e8, #0d47a1); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+  .submit-btn:hover { opacity: 0.9; }
+
+  .success-screen { display: none; text-align: center; padding: 32px 0; }
+  .success-screen h2 { color: #1b5e20; margin-bottom: 8px; }
+  .success-screen p { color: #555; font-size: 14px; }
+  .reset-btn { margin-top: 18px; padding: 10px 22px; background: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 600; }
+
+
+
+  /* Table */
+  .data-section { background: white; border-radius: 12px; padding: 22px 24px; margin-top: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .data-section h2 { font-size: 15px; color: #333; margin-bottom: 14px; font-weight: 600; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 480px; }
+  th { background: #f0f4f8; padding: 10px 12px; text-align: left; color: #555; font-weight: 600; border-bottom: 2px solid #e0e0e0; }
+  td { padding: 9px 12px; border-bottom: 1px solid #f0f0f0; color: #333; }
+  tr:last-child td { border-bottom: none; }
+  .no-data { text-align: center; color: #aaa; padding: 20px; font-size: 13px; }
+  .export-btn { margin-top: 14px; padding: 9px 18px; background: #34a853; color: white; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="container">
+
+
+
+  <!-- FORM -->
+  <div id="tab-form">
+    <div class="header" style="border-radius:12px 12px 0 0"><h1>🚗 Vehicle Data Collection</h1><p>All fields marked * are mandatory</p></div>
+    <div class="card">
+      <div id="form-view">
+        <p style="font-size:12px;color:#888;margin-bottom:18px;"><span style="color:#e53935">*</span> All fields are mandatory</p>
+        <div class="field-group">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" id="name" placeholder="Enter your full name" />
+          <div class="error-msg" id="name-err">Please enter your full name.</div>
+        </div>
+        <div class="field-group">
+          <label>Vehicle Number <span class="req">*</span></label>
+          <input type="text" id="vehicle" placeholder="e.g. MH12AB1234" style="text-transform:uppercase" />
+          <div class="error-msg" id="vehicle-err">Please enter a valid vehicle number.</div>
+        </div>
+        <div class="field-group">
+          <label>Mobile Number <span class="req">*</span></label>
+          <input type="tel" id="mobile" placeholder="Enter 10-digit mobile number" maxlength="10" />
+          <div class="error-msg" id="mobile-err">Please enter a valid 10-digit mobile number.</div>
+        </div>
+        <div class="field-group">
+          <label>Referrer Name <span class="req">*</span></label>
+          <input type="text" id="referrer" placeholder="Name of person who referred you" />
+          <div class="hint">Name of the person who referred you</div>
+          <div class="error-msg" id="referrer-err">Please enter the referrer's name.</div>
+        </div>
+        <button class="submit-btn" onclick="submitForm()">Submit ✓</button>
+      </div>
+      <div class="success-screen" id="success-view">
+        <div style="font-size:52px;margin-bottom:14px">✅</div>
+        <h2>Submitted Successfully!</h2>
+        <p>Your details have been recorded.<br>Check the data table below.</p>
+        <button class="reset-btn" onclick="resetForm()">Submit Another Entry</button>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+  <!-- DATA TABLE -->
+  <div class="data-section">
+    <h2>📋 Collected Entries (<span id="entry-count">0</span>)</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Name</th><th>Vehicle No.</th><th>Mobile</th><th>Referrer</th><th>Time</th></tr></thead>
+        <tbody id="table-body">
+          <tr><td colspan="6" class="no-data">No entries yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <button class="export-btn" onclick="exportCSV()">⬇ Export CSV</button>
+  </div>
+
+</div>
+
+<script>
+// FORM
+let entries = [];
+function validate(id, errId, cond) {
+  const el = document.getElementById(id), err = document.getElementById(errId);
+  const ok = cond(el.value.trim());
+  el.classList.toggle('error', !ok);
+  err.style.display = ok ? 'none' : 'block';
+  return ok;
+}
+function submitForm() {
+  const ok = [
+    validate('name','name-err', v => v.length >= 2),
+    validate('vehicle','vehicle-err', v => v.length >= 4),
+    validate('mobile','mobile-err', v => /^\d{10}$/.test(v)),
+    validate('referrer','referrer-err', v => v.length >= 2)
+  ].every(Boolean);
+  if (!ok) return;
+  entries.push({
+    name: document.getElementById('name').value.trim(),
+    vehicle: document.getElementById('vehicle').value.trim().toUpperCase(),
+    mobile: document.getElementById('mobile').value.trim(),
+    referrer: document.getElementById('referrer').value.trim(),
+    time: new Date().toLocaleString('en-IN')
+  });
+  renderTable();
+  document.getElementById('form-view').style.display = 'none';
+  document.getElementById('success-view').style.display = 'block';
+}
+function resetForm() {
+  ['name','vehicle','mobile','referrer'].forEach(id => { document.getElementById(id).value = ''; document.getElementById(id).classList.remove('error'); });
+  ['name-err','vehicle-err','mobile-err','referrer-err'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('form-view').style.display = 'block';
+  document.getElementById('success-view').style.display = 'none';
+}
+function renderTable() {
+  document.getElementById('entry-count').textContent = entries.length;
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = entries.length ? entries.map((e,i)=>`<tr><td>${i+1}</td><td>${e.name}</td><td>${e.vehicle}</td><td>${e.mobile}</td><td>${e.referrer}</td><td>${e.time}</td></tr>`).join('') : '<tr><td colspan="6" class="no-data">No entries yet.</td></tr>';
+}
+function exportCSV() {
+  if (!entries.length) { alert('No data to export.'); return; }
+  const csv = [['#','Name','Vehicle Number','Mobile','Referrer','Timestamp'], ...entries.map((e,i)=>[i+1,e.name,e.vehicle,e.mobile,e.referrer,e.time])].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='vehicle_entries.csv'; a.click();
+}
+
+</script>
+</body>
+</html>
